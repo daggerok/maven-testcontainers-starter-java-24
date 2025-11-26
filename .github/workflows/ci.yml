@@ -1,0 +1,99 @@
+name: ci
+on:
+  push:
+  workflow_dispatch:
+    inputs:
+      trigger:
+        description: Type m to trigger manual jobs
+        required: false
+        default: ''
+env:
+  JAVA_VERSION: '24'
+  JAVA_ZULU_DISTRIBUTION: 'zulu'
+  JAVA_GRAALVM_DISTRIBUTION: 'graalvm'
+jobs:
+  mvn-versions-display-updates:
+    if: github.event.inputs.trigger == ''
+      || !startsWith(github.event.inputs.trigger, 'm')
+      || !startsWith(github.event.inputs.trigger, 'M')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/cache@v4
+        id: java-cache
+        with:
+          path: |
+            ~/.m2/repository
+            !~/.m2/repository/io/github/daggerok
+          key: ${{ runner.os }}-${{ hashFiles('**/pom.xml', '**/.mvn/**', '**/mvnw*') }}
+      - uses: graalvm/setup-graalvm@v1
+        with:
+          java-version: ${{ env.JAVA_VERSION }}
+          distribution: ${{ env.JAVA_GRAALVM_DISTRIBUTION }}
+      - run: ./mvnw versions:display-parent-updates -Dmaven.version.ignore=".*(alpha|beta|rc|milestone|M\d+|RC\d+).*" --no-transfer-progress
+      - run: ./mvnw versions:display-plugin-updates -Dmaven.version.ignore=".*(alpha|beta|rc|milestone|M\d+|RC\d+).*" --no-transfer-progress
+      - run: ./mvnw versions:display-property-updates -Dmaven.version.ignore=".*(alpha|beta|rc|milestone|M\d+|RC\d+).*" --no-transfer-progress
+  graalvm-24-tests:
+    if: github.event.inputs.trigger == ''
+      || !startsWith(github.event.inputs.trigger, 'm')
+      || !startsWith(github.event.inputs.trigger, 'M')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/cache@v4
+        id: java-cache
+        with:
+          path: |
+            ~/.m2/repository
+            !~/.m2/repository/io/github/daggerok
+          key: ${{ runner.os }}-${{ hashFiles('**/pom.xml', '**/.mvn/**', '**/mvnw*') }}
+      - uses: graalvm/setup-graalvm@v1
+        with:
+          java-version: ${{ env.JAVA_VERSION }}
+          distribution: ${{ env.JAVA_GRAALVM_DISTRIBUTION }}
+      - run: ./mvnw clean --no-transfer-progress ; ./mvnw --no-transfer-progress
+  zulu-24-tests:
+    if: github.event.inputs.trigger == ''
+      || !startsWith(github.event.inputs.trigger, 'm')
+      || !startsWith(github.event.inputs.trigger, 'M')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/cache@v4
+        id: java-cache
+        with:
+          path: |
+            ~/.m2/repository
+            !~/.m2/repository/io/github/daggerok
+          key: ${{ runner.os }}-${{ hashFiles('**/pom.xml', '**/.mvn/**', '**/mvnw*') }}
+      - uses: actions/setup-java@v4
+        with:
+          java-version: ${{ env.JAVA_VERSION }}
+          distribution: ${{ env.JAVA_ZULU_DISTRIBUTION }}
+      - run: ./mvnw clean --no-transfer-progress ; ./mvnw --no-transfer-progress
+  degit-zulu-24-tests:
+    if: github.event.inputs.trigger == ''
+      || !startsWith(github.event.inputs.trigger, 'm')
+      || !startsWith(github.event.inputs.trigger, 'M')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 'lts/*'
+      - uses: actions/cache@v4
+        id: java-cache
+        with:
+          path: |
+            ~/.m2/repository
+            !~/.m2/repository/io/github/daggerok
+          key: ${{ runner.os }}-${{ hashFiles('**/pom.xml', '**/.mvn/**', '**/mvnw*') }}
+      - uses: actions/setup-java@v4
+        with:
+          java-version: ${{ env.JAVA_VERSION }}
+          distribution: ${{ env.JAVA_ZULU_DISTRIBUTION }}
+      - run: |
+          cd /tmp
+          npx --yes degit daggerok/maven-testcontainers-starter-java-24 my-testcontainers-project && cd $_
+          ./mvnw clean --no-transfer-progress
+          ./mvnw --no-transfer-progress

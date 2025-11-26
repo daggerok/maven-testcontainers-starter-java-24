@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+  <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+    <encoder>
+      <!-- colorless: must be used for better junit test reports output contents without ansi symbols -->
+      <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} %-5level %-10.10thread{10} [ %-25.25logger{25} ] - %msg%n</pattern>
+    </encoder>
+  </appender>
+  <root level="info">
+    <appender-ref ref="STDOUT"/>
+  </root>
+</configuration>
