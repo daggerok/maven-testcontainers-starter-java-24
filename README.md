@@ -1,4 +1,4 @@
-# maven-slf4j-lib-starter [![ci](https://github.com/daggerok/maven-testcontainers-starter-java-24/actions/workflows/ci.yml/badge.svg)](https://github.com/daggerok/maven-testcontainers-starter-java-24/actions/workflows/ci.yml)
+# maven-testcontainers-starter-java-24 [![ci](https://github.com/daggerok/maven-testcontainers-starter-java-24/actions/workflows/ci.yml/badge.svg)](https://github.com/daggerok/maven-testcontainers-starter-java-24/actions/workflows/ci.yml)
 Maven testcontainers project starter using maven wrapper, slf4j, assertj and java 24 (tested on Zulu and GraalVM)
 
 ## Getting Started
