@@ -14,32 +14,37 @@ import redis.clients.jedis.Jedis;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+/**
+ * See <a href="https://java.testcontainers.org/quickstart/junit_5_quickstart/">JUnit 5 Quickstart page on Testcontainers site</a>
+ */
 @Slf4j
 @Testcontainers
 @DisplayNameGeneration(DisplayNameGenerator.ReplaceUnderscores.class)
-class RedisTestcontainersTest {
+class GenericTestcontainersTest {
 
   @Container
-  public GenericContainer redis = new GenericContainer(DockerImageName.parse("redis:6-alpine"))
+  @SuppressWarnings("rawtypes")
+  GenericContainer<?> redis = new GenericContainer(DockerImageName.parse("redis:6-alpine"))
     .waitingFor(Wait.forListeningPort().withStartupTimeout(Duration.ofSeconds(30)))
-    .withExposedPorts(6379);
+    .withExposedPorts(6379)
+    .withReuse(true);
 
   @Test
-  void should_succeeded() {
+  void should_test_redis() {
     // given
-    var redisAddress = this.redis.getContainerIpAddress();
+    var redisAddress = this.redis.getHost();
     var redisPort = this.redis.getMappedPort(6379);
-    var redisClient = new Jedis(redisAddress, redisPort);
 
     // when
-    var setResult = redisClient.set("hello", "world");
-    log.info("set result: {}", setResult);
-    assertThat(setResult).isEqualTo("OK");
+    try (var redisClient = new Jedis(redisAddress, redisPort)) {
+      var setResult = redisClient.set("hello", "world");
+      log.info("set result: {}", setResult);
+      assertThat(setResult).isEqualTo("OK");
 
-    // then
-    var getResult = redisClient.get("hello");
-    log.info("get result: {}", getResult);
-    // and
-    assertThat(getResult).isEqualTo("world");
+      // then
+      var getResult = redisClient.get("hello");
+      log.info("get result: {}", getResult);
+      assertThat(getResult).isEqualTo("world");
+    }
   }
 }

@@ -1,0 +1,6 @@
+services:
+  localstack:
+    extends:
+      file: ./docker-compose-localstack.yml
+      service: localstack
+    ports: ["4566:4566"]

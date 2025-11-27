@@ -1,0 +1,12 @@
+services:
+  localstack:
+    image: localstack/localstack:4.11.1
+    restart: always
+    environment:
+      SERVICES: s3
+      AWS_ACCESS_KEY_ID: test
+      AWS_SECRET_ACCESS_KEY: test
+      AWS_REGION: us-east-1
+      DEBUG: 1
+    volumes:
+      - ./localstack/initialize.sh:/etc/localstack/init/ready.d/initialize.sh:ro
